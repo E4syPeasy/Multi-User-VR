@@ -35,6 +35,11 @@ public class GameSetupController : MonoBehaviour
     public float matchLength; //in seconds
     bool gameEnded;
 
+    public int localMovement;
+    public int endOfGameMovementP1;
+    public int endOfGameMovementP2;
+
+
     private void Awake()
     {
         GSC = this;
@@ -49,6 +54,10 @@ public class GameSetupController : MonoBehaviour
         zArea = 4.0f;
         spawnWait = 0.5f; //time between sb spawns
         startWait = 0.0f; //time before sb start spawning
+
+        localMovement = 0;
+        endOfGameMovementP1 = 0;
+        endOfGameMovementP2 = 0;
     }
 
     // Start is called before the first frame update
@@ -71,7 +80,7 @@ public class GameSetupController : MonoBehaviour
             //creates PlayerAvatar ("PhotonPlayer") at a spawn-point 2
             Debug.Log("Creating Player2");
 
-            if (level == 0)
+            if (level == 101)
             {
                 CreatePlayerTwoTutorial(); // s_teleport
             }
@@ -91,7 +100,7 @@ public class GameSetupController : MonoBehaviour
     void CreatePlayerOne(int level)
     {
         // Teleport + Snowman
-        if ((level ==1) || (level == 0))
+        if ((level ==1) || (level == 101))
         {
             myPlayer1 = PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "s_Teleport"),
                                                 spawnPoints[0].position, spawnPoints[0].rotation);
@@ -100,7 +109,7 @@ public class GameSetupController : MonoBehaviour
             groundPlayer1.GetComponent<TeleportationArea>().teleportationProvider = myPlayer1.GetComponent<TeleportationProvider>();
         }
         //Joystick + Snowman
-        else if (level == 2)
+        else if ((level == 2) || (level == 102))
         {
             myPlayer1 = PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "s_Joystick"),
                                                 spawnPoints[0].position, spawnPoints[0].rotation);
@@ -153,18 +162,21 @@ public class GameSetupController : MonoBehaviour
             pauseCoroutine = false;
         }
 
-        //would be better if only master handles time for all players
-        //this should still work well enough because both players join roughly at the same time (<1sec)
-        if (matchLength < 0f && !gameEnded)//end game when countdown reaches 0
+        // stop snowball spawns, delete snowballs, update statistics, save into txt and go back to menu
+        if (matchLength < 0f && !gameEnded && PhotonNetwork.IsMasterClient)//end game when countdown reaches 0
         {
             Debug.Log("countdown 0 - try end game");
             photonView.RPC("StopSnowballs", RpcTarget.All); //stops coroutines for all players
-            
-            //TODO save statistics (playerCounts, movementWalked, numberOfTeleports etc.)
-            //TODO: reset all variales via RPC 
-            //TODO: test if menu needs reset too 
+
+            //TODO update statistics 
+            photonView.RPC("UpdateAllStats", RpcTarget.All);
+            //TODO: check if all variables get reset correctly
+            // wait for stats
+            //Coroutine wait = StartCoroutine(WaitForStats());
             gameEnded = true;
 
+            //save statistics (playerCounts, movementWalked, numberOfTeleports etc.)
+            photonView.RPC("SaveStats", RpcTarget.MasterClient);
             // change back to menu scene (waiting room)
             photonView.RPC("BackToMenu", RpcTarget.MasterClient);
         }
@@ -173,7 +185,6 @@ public class GameSetupController : MonoBehaviour
             matchLength = matchLength - Time.deltaTime;
             timerText.SetText("" + (int)matchLength);
         }
-        
     }
     
     //spawns snowballs around a given point (Vec3) while maxSnowballs < snowballsSpawned 
@@ -196,6 +207,13 @@ public class GameSetupController : MonoBehaviour
             yield return new WaitForSeconds(spawnWait);
             
         }
+    }
+
+    IEnumerator WaitForStats()
+    {
+        Debug.Log("Time: " + System.DateTime.Now);
+        yield return new WaitForSecondsRealtime(3);
+        Debug.Log("Time: " + System.DateTime.Now);
     }
 
     [PunRPC]
@@ -236,12 +254,56 @@ public class GameSetupController : MonoBehaviour
         Debug.Log("Player2Panel changed");
     }
 
+    
+    [PunRPC]
+    void UpdateAllStats()
+    {
+        Debug.Log("end of game stats");
+        if (PhotonNetwork.IsMasterClient)
+        {
+            Debug.Log("end of game stats p1");
+            endOfGameMovementP1 = localMovement;
+        }
+        else
+        {
+            Debug.Log("end of game stats p2");
+            endOfGameMovementP2 = localMovement;
+        }
+    }
+
+    //saves statistics for both players and saves it into txt-file (Asset-Folder)
+    [PunRPC] 
+    void SaveStats()
+    {
+        Debug.Log("saving stats");
+
+        //path of the file
+        string path = Application.dataPath + "/GameStatistics.txt";
+        Debug.Log("path: " + path);
+
+        //create if it doesn't exist, otherwise append
+        if (!File.Exists(path))
+        {
+            Debug.Log("create File");
+            File.WriteAllText(path, "StartContent \n --------------------------------------- \n");
+        }
+        string LevelAndTime = "Time: " + System.DateTime.Now + "\n" + "Stats for Level: " + level + "\n\n";
+        string playerStatsP1 = "Player 1 (Master): \n endOfGameMovementP1: " + endOfGameMovementP1 + "\n player1Score: " + player1Score + "\n";
+        string playerStatsP2 = "Player 2: \n endOfGameMovementP1: " + endOfGameMovementP2 + "\n player1Score: " + player2Score + "\n";
+        string devider = "--------------------------------------- \n";
+
+        //appends current stats to txt-file
+        File.AppendAllText(path, LevelAndTime);
+        File.AppendAllText(path, playerStatsP1);
+        File.AppendAllText(path, playerStatsP2);
+        File.AppendAllText(path, devider);
+    }
 
     [PunRPC]
     void BackToMenu()
     {
         //should/can only be called by master
-        Debug.Log("try: back to menu");
+        Debug.Log("back to menu");
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.LoadLevel(1);
@@ -261,5 +323,5 @@ public class GameSetupController : MonoBehaviour
     //    }
     //    Debug.Log("GSC: destroyed Snowball");
     //}
-   
+
 }
