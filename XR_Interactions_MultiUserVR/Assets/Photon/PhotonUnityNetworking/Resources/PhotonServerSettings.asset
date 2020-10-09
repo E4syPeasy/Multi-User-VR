@@ -47,6 +47,8 @@ MonoBehaviour:
   - StopSnowballs
   - SaveStats
   - UpdateAllStats
+  - UpdateCanvasCancel
+  - SelectionCanceled
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

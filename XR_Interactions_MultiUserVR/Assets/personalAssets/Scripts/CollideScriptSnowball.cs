@@ -7,6 +7,7 @@ public class CollideScriptSnowball : MonoBehaviourPun, IPunObservable
     int collsionCounter;
     PhotonView thisPV;
 
+    bool sbDestroyed;
     Rigidbody rb;
     Vector3 latestPos;
     Quaternion latestRot;
@@ -34,33 +35,36 @@ public class CollideScriptSnowball : MonoBehaviourPun, IPunObservable
             return;
         }
         
-        if (collision.gameObject.tag == "Avatar1")
+        if (!sbDestroyed && collision.gameObject.tag == "Avatar1")
         {
             //when player1 gets hit -> add a point to player2
             GSCphotonView.RPC("UpdatePlayer2Score", RpcTarget.All);
             destroySnowball();
+            sbDestroyed = true;
         }
 
-        else if (collision.gameObject.tag == "Avatar2") //when player2 gets hit -> add a point to player1
+        else if (!sbDestroyed && collision.gameObject.tag == "Avatar2") //when player2 gets hit -> add a point to player1
         {
             GSCphotonView.RPC("UpdatePlayer1Score", RpcTarget.All);
             destroySnowball();
+            sbDestroyed = true;
         }
-        else
+        else if(!sbDestroyed)
         {
             //should be destoyed when it hits ground/fence (but not own Avatar etc.)
             destroySnowball();
+            sbDestroyed = true;
         }
     }
 
     //Transfer PhotonView of obj/Rigidbody to our local player
     public void OnSnowballGrabbed()
     {
-        if (!photonView.IsMine)
+        if (!thisPV.IsMine)
         {
-            thisPV.TransferOwnership(PhotonNetwork.LocalPlayer); //photonView.Tr...
+            // thisPV.TransferOwnership(PhotonNetwork.LocalPlayer);
         }
-
+        Debug.Log("SnowballGrabbed: " + SnowballGrabbed);
         SnowballGrabbed = true;
     }
 
@@ -71,17 +75,25 @@ public class CollideScriptSnowball : MonoBehaviourPun, IPunObservable
         
         Debug.Log("Collide-script: try destroy" + thisPV);
         //only master destroys (network-)instantiated object associated with photonView (for all players)
-        GSCphotonView.RPC("DeleteSnowball", RpcTarget.MasterClient, thisPV);
+        // ^ only for scene/room-objects
+        //GSCphotonView.RPC("DeleteSnowball", RpcTarget.MasterClient, thisPV);
 
-        GameSetupController.GSC.snowballsSpawned--;
+        //GameSetupController.GSC.snowballsSpawned--;
+        GameSetupController.GSC.SpawnSnowballAtRandomLoc();
         Debug.Log("Snowball-counter (CollideScript):" + GameSetupController.GSC.snowballsSpawned);
+
+        if (thisPV.IsMine)
+        {
+            //PhotonNetwork.Destroy(thisPV); //TODO test
+            PhotonNetwork.Destroy(gameObject);
+        }
 
     }
 
     //once per frame
     void Update()
     {
-        if (!photonView.IsMine && valuesReceived)
+        if (!thisPV.IsMine && valuesReceived)
         {
             //Update Object position and Rigidbody parameters
             transform.position = Vector3.Lerp(transform.position, latestPos, Time.deltaTime * 5);

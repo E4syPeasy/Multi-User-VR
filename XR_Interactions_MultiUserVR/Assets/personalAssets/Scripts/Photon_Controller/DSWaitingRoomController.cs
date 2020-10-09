@@ -124,10 +124,9 @@ public class DSWaitingRoomController : MonoBehaviourPunCallbacks
     
     public void DelayCancel()
     {
-        levelSelected = false;
-        //TODO check why leaving room crashes the game/lobby
-        // PhotonNetwork.LeaveRoom();
-        //  SceneManager.LoadScene();
+        myPV.RPC("SelectionCanceled", RpcTarget.All);
+        myPV.RPC("UpdateCanvasCancel", RpcTarget.All);
+        Debug.Log("canceled ");
     }
 
     [PunRPC]
@@ -151,10 +150,21 @@ public class DSWaitingRoomController : MonoBehaviourPunCallbacks
         levelSelected = true;
     }
 
-    //send master update so he can start the Game ...
+    [PunRPC]
+    private void SelectionCanceled(int sceneIndex)
+    {
+        levelSelected = false;
+    }
+
     [PunRPC]
     private void UpdateCanvas(int level)
     {
         SelectedLevelText.SetText("Selected Level: " + level);
+    }
+
+    [PunRPC]
+    private void UpdateCanvasCancel()
+    {
+        SelectedLevelText.SetText("no Level selected ");
     }
 }
