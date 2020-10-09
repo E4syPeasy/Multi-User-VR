@@ -49,7 +49,7 @@ public class GameSetupController : MonoBehaviour
         player1Score = 0;
         player2Score = 0;
         snowballsSpawned = 0;
-        maxSnowballs = 30;
+        maxSnowballs = 5; //Todo 30
         xArea = 15.0f; //Area for sb spawns (+/- 15)
         zArea = 4.0f;
         spawnWait = 0.5f; //time between sb spawns
@@ -156,10 +156,12 @@ public class GameSetupController : MonoBehaviour
         if (snowballsSpawned >= maxSnowballs)
         {
             pauseCoroutine = true;
+           // Debug.Log("pauseCoroutine " + pauseCoroutine);
         }
         else
         {
             pauseCoroutine = false;
+          //  Debug.Log("pauseCoroutine " + pauseCoroutine);
         }
 
         // stop snowball spawns, delete snowballs, update statistics, save into txt and go back to menu
@@ -171,8 +173,6 @@ public class GameSetupController : MonoBehaviour
             //TODO update statistics 
             photonView.RPC("UpdateAllStats", RpcTarget.All);
             //TODO: check if all variables get reset correctly
-            // wait for stats
-            //Coroutine wait = StartCoroutine(WaitForStats());
             gameEnded = true;
 
             //save statistics (playerCounts, movementWalked, numberOfTeleports etc.)
@@ -190,25 +190,27 @@ public class GameSetupController : MonoBehaviour
     //spawns snowballs around a given point (Vec3) while maxSnowballs < snowballsSpawned 
     IEnumerator Spawner(Vector3 spawnPoint)
     {
-        yield return new WaitForSeconds(startWait);
+        // yield return new WaitForSeconds(startWait);
         
-        while (!pauseCoroutine)
+        while (!pauseCoroutine) 
         {
             //spawn in random position in general spawn-area of players
             Vector3 spawnPosition = new Vector3(Random.Range(spawnPoint.x - xArea, spawnPoint.x + xArea), 
                                                 1, 
                                                 Random.Range(spawnPoint.z - zArea, spawnPoint.z + zArea));
 
-            Instantiate(snowball, spawnPosition + transform.TransformPoint(0, 0, 0), Quaternion.identity);
+            //Instantiate(snowball, spawnPosition + transform.TransformPoint(0, 0, 0), Quaternion.identity);
+            //TODO test, previous InstantiateSceneObject, renamed to InstantiateRoomObject
+            PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "Snowball"), spawnPosition + transform.TransformPoint(0, 0, 0), Quaternion.identity);
+
             snowballsSpawned++;
             Debug.Log("Snowball-counter:" + snowballsSpawned);
-            //PhotonNetwork.InstantiateSceneObject(Path.Combine("PhotonPrefabs", "Snowball"), spawnPosition, spawnPoints[1].rotation);
 
             yield return new WaitForSeconds(spawnWait);
             
         }
     }
-
+    //currently not used
     IEnumerator WaitForStats()
     {
         Debug.Log("Time: " + System.DateTime.Now);
@@ -232,7 +234,9 @@ public class GameSetupController : MonoBehaviour
         //delete all snowballs
         foreach (GameObject sb in GameObject.FindGameObjectsWithTag("Snowball"))
         {
-            Destroy(sb, 0.1f);
+            //Destroy(sb, 0.1f);
+            //TODO test
+            photonView.RPC("DeleteSnowball", RpcTarget.MasterClient, sb.GetPhotonView());
         }
     }
 
@@ -310,18 +314,17 @@ public class GameSetupController : MonoBehaviour
         }
     }
 
-    /// !!! currently not used !!!
-    //because network obj. don't work with XR-interactable/grabbing
-    //[PunRPC]
-    //public void DeleteSnowball(PhotonView pv)
-    //{
-    //    //should/can only be called by master -> destroys obj instanciated by network
-    //    Debug.Log("GSC: try destroying Snowball");
-    //    if (PhotonNetwork.IsMasterClient)
-    //    {
-    //        PhotonNetwork.Destroy(pv);
-    //    }
-    //    Debug.Log("GSC: destroyed Snowball");
-    //}
+    [PunRPC]
+    public void DeleteSnowball(PhotonView pv)
+    {
+        //should/can only be called by master -> destroys obj instanciated by network
+        Debug.Log("GSC: try destroying Snowball");
+        if (PhotonNetwork.IsMasterClient)
+        {
+             pv.TransferOwnership(PhotonNetwork.MasterClient); // PhotonNetwork.LocalPlayer
+            PhotonNetwork.Destroy(pv);
+        }
+        Debug.Log("GSC: destroyed Snowball");
+    }
 
 }

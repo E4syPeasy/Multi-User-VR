@@ -970,6 +970,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: player2_Avatar
       objectReference: {fileID: 0}
+    - target: {fileID: 6999665019643727717, guid: 847e4f89b8d8538468bc65b26367f631,
+        type: 3}
+      propertyPath: m_TagString
+      value: Avatar2
+      objectReference: {fileID: 0}
     - target: {fileID: 7376964181200697498, guid: 847e4f89b8d8538468bc65b26367f631,
         type: 3}
       propertyPath: m_Radius

@@ -61,7 +61,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8378688045383573233}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -10.495514, y: -4.9751964, z: 1.8725778}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_Children:
   - {fileID: 7780885392798067290}
@@ -175,7 +175,18 @@ MonoBehaviour:
       m_Calls: []
   m_OnSelectEnter:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2718886469568238975}
+        m_MethodName: OnSnowballGrabbed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnSelectExit:
     m_PersistentCalls:
       m_Calls: []
@@ -215,7 +226,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   m_ThrowVelocityScale: 4
-  m_ThrowAngularVelocityScale: 1
+  m_ThrowAngularVelocityScale: 0.3
   m_GravityOnDetach: 0
   m_RetainTransformParent: 1
 --- !u!114 &5628880411203621912
@@ -233,10 +244,10 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 0
-  OwnershipTransfer: 0
+  Synchronization: 3
+  OwnershipTransfer: 1
   ObservedComponents:
-  - {fileID: 0}
+  - {fileID: -2718886469568238975}
   viewIdField: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -252,3 +263,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c713000f2d6289478d6410d50fa2e38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SnowballGrabbed: 0

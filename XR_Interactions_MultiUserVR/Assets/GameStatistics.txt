@@ -40,3 +40,53 @@ Player 2:
  endOfGameMovementP1: 0
  player1Score: 0
 --------------------------------------- 
+Time: 07.10.2020 21:25:37
+Stats for Level: 4
+
+Player 1 (Master): 
+ endOfGameMovementP1: 0
+ player1Score: 1
+Player 2: 
+ endOfGameMovementP1: 0
+ player1Score: 3
+--------------------------------------- 
+Time: 07.10.2020 21:26:23
+Stats for Level: 102
+
+Player 1 (Master): 
+ endOfGameMovementP1: 0
+ player1Score: 1
+Player 2: 
+ endOfGameMovementP1: 0
+ player1Score: 0
+--------------------------------------- 
+Time: 07.10.2020 23:35:06
+Stats for Level: 4
+
+Player 1 (Master): 
+ endOfGameMovementP1: 0
+ player1Score: 1
+Player 2: 
+ endOfGameMovementP1: 0
+ player1Score: 1
+--------------------------------------- 
+Time: 07.10.2020 23:47:10
+Stats for Level: 4
+
+Player 1 (Master): 
+ endOfGameMovementP1: 0
+ player1Score: 1
+Player 2: 
+ endOfGameMovementP1: 0
+ player1Score: 1
+--------------------------------------- 
+Time: 07.10.2020 23:47:51
+Stats for Level: 102
+
+Player 1 (Master): 
+ endOfGameMovementP1: 0
+ player1Score: 0
+Player 2: 
+ endOfGameMovementP1: 0
+ player1Score: 0
+--------------------------------------- 
