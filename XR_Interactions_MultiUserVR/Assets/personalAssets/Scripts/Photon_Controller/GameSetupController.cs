@@ -10,17 +10,15 @@ public class GameSetupController : MonoBehaviour
     public int level; //set in editor (used to spawn different player-prefabs in every lvl)
     public Transform[] spawnPoints = new Transform[2];
     public static GameSetupController GSC;
-    public int player1Score;
-    public int player2Score;
+    int player1Score;
+    int player2Score;
     public TextMeshProUGUI player1Text;
     public TextMeshProUGUI player2Text;
     public GameObject groundPlayer1;
     public GameObject groundPlayer2;
     public GameObject myPlayer1;
-    public Animator animator;
     public GameObject myPlayer2;
     PhotonView photonView;
-
     public int snowballsSpawned;
     public int maxSnowballs;
     int endOfGameSBThrownP1;
@@ -28,13 +26,13 @@ public class GameSetupController : MonoBehaviour
     public GameObject snowball;
     Coroutine player1Coroutine;
     Coroutine player2Coroutine;
-    public float xArea; //Area for snowball-spawns
-    public float zArea;
+    float xArea; //Area for snowball-spawns
+    float zArea;
     float spawnWait; //time between sb spawns
     float startWait; //time before sb start spawning
     public bool pauseCoroutine;
     public TextMeshProUGUI timerText;
-    public float matchLength; //in seconds
+    float matchLength; //in seconds
     bool gameEnded;
 
     public int localMovement;
@@ -62,6 +60,19 @@ public class GameSetupController : MonoBehaviour
         endOfGameMovementP2 = 0;
         endOfGameSBThrownP1 = 0;
         endOfGameSBThrownP2 = 0;
+
+        if (level==101)
+        {
+            matchLength = 90; //90
+        }
+        else if (level == 102)
+        {
+            matchLength = 30; //30
+        }
+        else
+        {
+            matchLength = 120; //120sec default time
+        }
     }
 
     // Start is called before the first frame update
@@ -201,7 +212,6 @@ public class GameSetupController : MonoBehaviour
             Debug.Log("Snowball-counter:" + snowballsSpawned);
 
             yield return new WaitForSeconds(spawnWait);
-            
         }
     }
 
@@ -212,20 +222,26 @@ public class GameSetupController : MonoBehaviour
         if (PhotonNetwork.IsMasterClient)
         {
             spawnPointSB = spawnPoints[0].position;
+
+            //spawn in random position in general spawn-area of players
+            Vector3 spawnPosition = new Vector3(Random.Range(spawnPointSB.x - xArea, spawnPointSB.x + xArea),
+                                                1,
+                                                Random.Range(spawnPointSB.z - zArea, spawnPointSB.z + zArea));
+
+            //Instantiate(snowball, spawnPosition + transform.TransformPoint(0, 0, 0), Quaternion.identity);
+            PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "Snowball"), spawnPosition + transform.TransformPoint(0, 0, 0), Quaternion.identity);
+            snowballsSpawned++;
         }
         else //spawn at second spawn-point
         {
             spawnPointSB = spawnPoints[1].position;
-        }
-        
-        //spawn in random position in general spawn-area of players
-        Vector3 spawnPosition = new Vector3(Random.Range(spawnPointSB.x - xArea, spawnPointSB.x + xArea),
-                                            1,
-                                            Random.Range(spawnPointSB.z - zArea, spawnPointSB.z + zArea));
+            Vector3 spawnPosition = new Vector3(Random.Range(spawnPointSB.x - xArea, spawnPointSB.x + xArea),
+                                                1,
+                                                Random.Range(spawnPointSB.z - zArea, spawnPointSB.z + zArea));
 
-        //Instantiate(snowball, spawnPosition + transform.TransformPoint(0, 0, 0), Quaternion.identity);
-        PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "Snowball"), spawnPosition + transform.TransformPoint(0, 0, 0), Quaternion.identity);
-        snowballsSpawned++;
+            PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "SnowballP2"), spawnPosition + transform.TransformPoint(0, 0, 0), Quaternion.identity);
+            snowballsSpawned++;
+        }
     }
   
     [PunRPC]
@@ -235,24 +251,31 @@ public class GameSetupController : MonoBehaviour
         if (PhotonNetwork.IsMasterClient)
         {
             StopCoroutine(player1Coroutine);
+
+            //delete all snowballs that you own/created and that are not currently hold 
+            foreach (GameObject sb in GameObject.FindGameObjectsWithTag("Snowball"))
+            {
+                //Destroy(sb, 0.1f);
+
+                //TODO still crashes for p2 - disabled for now ... sceneChange deletes everything anyways
+                if (sb.GetPhotonView().IsMine && !sb.GetComponent<CollideScriptSnowball>().SnowballGrabbed)
+                {
+                    // photonView.RPC("DeleteSnowball", RpcTarget.MasterClient, sb.GetPhotonView());
+                    Debug.Log("GSC: try destroying Snowball");
+                    PhotonNetwork.Destroy(sb);
+                }
+            }
         }
         else //stop spawning snowballs for !master
         {
             StopCoroutine(player2Coroutine);
-        }
-
-        //delete all snowballs that you own/created and that are not currently hold 
-        foreach (GameObject sb in GameObject.FindGameObjectsWithTag("Snowball"))
-        {
-            //Destroy(sb, 0.1f);
-
-            //TODO still crashes for p2 - disabled for now ... sceneChange deletes everything anyways
-            if (sb.GetPhotonView().IsMine && !sb.GetComponent<CollideScriptSnowball>().SnowballGrabbed)
+            foreach (GameObject sb in GameObject.FindGameObjectsWithTag("SnowballP2"))
             {
-               // photonView.RPC("DeleteSnowball", RpcTarget.MasterClient, sb.GetPhotonView());
-
-                Debug.Log("GSC: try destroying Snowball");
-                PhotonNetwork.Destroy(sb);
+                if (sb.GetPhotonView().IsMine && !sb.GetComponent<CollideScriptSnowball>().SnowballGrabbed)
+                {
+                    Debug.Log("GSC: try destroying Snowball P2");
+                    PhotonNetwork.Destroy(sb);
+                }
             }
         }
     }

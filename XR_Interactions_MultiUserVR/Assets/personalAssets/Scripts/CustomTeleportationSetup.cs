@@ -6,7 +6,7 @@ using Photon.Pun;
 namespace UnityEngine.XR.Interaction.Toolkit
 {
 
-    public class CustomTeleportationSetup : MonoBehaviour, IPunObservable
+    public class CustomTeleportationSetup : MonoBehaviour
     {
         PhotonView photonView;
         
@@ -18,7 +18,6 @@ namespace UnityEngine.XR.Interaction.Toolkit
         void Awake()
         {
             photonView = GetComponent<PhotonView>();
-            photonView.ObservedComponents.Add(this);
 
             if (photonView.IsMine)
             {
@@ -39,26 +38,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
                 rightController.SetActive(true);
             }
         }
-
-        //TODO: read photon-doc on IPunObservable -> momentan doppelt (photonTransformView in editor)
-        void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-        {
-            if (stream.IsWriting)
-            {
-                // We own this player: send the others our data
-          //      stream.SendNext(transform.position); //position of the character
-          //      stream.SendNext(transform.rotation); //rotation of the character
-            }
-            else
-            {
-          //      // Network player, receive data
-          //      Vector3 syncPosition = (Vector3)stream.ReceiveNext();
-           //     Quaternion syncRotation = (Quaternion)stream.ReceiveNext();
-            }
-        }
-
-
-
+        
     }
 }
 

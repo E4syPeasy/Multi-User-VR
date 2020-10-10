@@ -568,8 +568,8 @@ MonoBehaviour:
   leftController: {fileID: 0}
   rightController: {fileID: 0}
   Avatar: {fileID: 0}
+  allRenderer: []
   speed: 1
-  gravityMultiplier: 1
 --- !u!1 &5543932248777986317
 GameObject:
   m_ObjectHideFlags: 0

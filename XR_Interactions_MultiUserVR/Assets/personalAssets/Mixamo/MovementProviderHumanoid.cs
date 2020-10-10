@@ -130,5 +130,20 @@ public class MovementProviderHumanoid : LocomotionProvider
         animator.SetFloat("Horizontal", animator_x); 
         animator.SetFloat("Vertical", animator_z);  
     }
+
+    //currently not used because it caused strange lags
+    public void throwAnimation(bool started)
+    {
+        if (started)
+        {
+            animator.SetBool("throw", started);
+            //animator.SetTrigger("throwTrigger");
+        }
+        else
+        {
+           animator.SetBool("throw", started);
+        }
+
+    }
     
 }

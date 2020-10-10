@@ -7,6 +7,7 @@ TagManager:
   - Snowball
   - Avatar1
   - Avatar2
+  - SnowballP2
   layers:
   - Default
   - TransparentFX
@@ -19,8 +20,8 @@ TagManager:
   - Player
   - Interactable
   - Ground
-  - 
-  - 
+  - InteractableP2
+  - GroundP2
   - 
   - 
   - 

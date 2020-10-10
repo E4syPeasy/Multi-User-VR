@@ -151,7 +151,7 @@ public class DSWaitingRoomController : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    private void SelectionCanceled(int sceneIndex)
+    private void SelectionCanceled()
     {
         levelSelected = false;
     }
