@@ -19,7 +19,8 @@ public class MovementProvider : LocomotionProvider
     public GameObject Avatar;
     public Renderer[] allRenderer;
 
-    public float speed = 1.1f;
+    public float TotalVecLength;
+    public float speed; //1.1f editor 2.7f
 
     private CharacterController characterController = null;
     private GameObject head = null;
@@ -27,8 +28,7 @@ public class MovementProvider : LocomotionProvider
     protected override void Awake()
     {
         photonView = GetComponent<PhotonView>();
-       // photonView.ObservedComponents.Add(this);
-        
+
         if (photonView.IsMine)
         {
             characterController = GetComponent<CharacterController>();
@@ -115,7 +115,30 @@ public class MovementProvider : LocomotionProvider
 
         // Apply speed and move
         Vector3 movement = direction * speed;
-        characterController.Move(movement * Time.deltaTime);
+        Vector3 distance = movement * Time.deltaTime;
+
+        float VecLength = distance.magnitude;
+        TotalVecLength = TotalVecLength + VecLength;
+
+        //if (PhotonNetwork.IsMasterClient)
+        //{
+        //    GameSetupController.GSC.MovementP1 = TotalVecLength;
+        //}
+        //else //todo check if network can handle this -> Rpc inside Rpc?
+        //{
+        //    GameSetupController.GSC.photonView.RPC("RPCmovementP2", RpcTarget.MasterClient, TotalVecLength);
+        //}
+
+        GameSetupController.GSC.localMovement = TotalVecLength;
+       // Debug.Log("localMovement: " + GameSetupController.GSC.localMovement);
+
+
+        // Debug.Log("movement: " + movement); // always same amount 0.001
+        // Debug.Log("distance: " + distance); //always (0,0,0) but .Move still works -> actually not 0, just rounded down in console
+        // Debug.Log("VecLength: " + VecLength);
+        // Debug.Log("TotalVecLength: " + TotalVecLength);
+
+        characterController.Move(distance);
     }
     
 }

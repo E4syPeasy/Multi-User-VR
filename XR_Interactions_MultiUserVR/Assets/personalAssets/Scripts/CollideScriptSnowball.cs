@@ -79,6 +79,15 @@ public class CollideScriptSnowball : MonoBehaviourPun, IPunObservable
         //GSCphotonView.RPC("DeleteSnowball", RpcTarget.MasterClient, thisPV);
 
         //GameSetupController.GSC.snowballsSpawned--;
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            GameSetupController.GSC.endOfGameSBThrownP1++;
+        }
+        else
+        {
+            GameSetupController.GSC.endOfGameSBThrownP2++;
+        }
         GameSetupController.GSC.SpawnSnowballAtRandomLoc();
         Debug.Log("Snowball-counter (CollideScript):" + GameSetupController.GSC.snowballsSpawned);
 

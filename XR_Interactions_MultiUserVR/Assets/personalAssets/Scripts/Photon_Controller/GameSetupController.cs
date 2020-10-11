@@ -4,12 +4,14 @@ using System.IO;
 using UnityEngine.XR.Interaction.Toolkit;
 using TMPro;
 using System.Collections;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameSetupController : MonoBehaviour
 {
     public int level; //set in editor (used to spawn different player-prefabs in every lvl)
     public Transform[] spawnPoints = new Transform[2];
     public static GameSetupController GSC;
+  
     int player1Score;
     int player2Score;
     public TextMeshProUGUI player1Text;
@@ -18,11 +20,11 @@ public class GameSetupController : MonoBehaviour
     public GameObject groundPlayer2;
     public GameObject myPlayer1;
     public GameObject myPlayer2;
-    PhotonView photonView;
+    public PhotonView photonView;
     public int snowballsSpawned;
     public int maxSnowballs;
-    int endOfGameSBThrownP1;
-    int endOfGameSBThrownP2;
+    public int endOfGameSBThrownP1;
+    public int endOfGameSBThrownP2;
     public GameObject snowball;
     Coroutine player1Coroutine;
     Coroutine player2Coroutine;
@@ -30,40 +32,32 @@ public class GameSetupController : MonoBehaviour
     float zArea;
     float spawnWait; //time between sb spawns
     float startWait; //time before sb start spawning
-    public bool pauseCoroutine;
+   // public bool pauseCoroutine;
     public TextMeshProUGUI timerText;
     float matchLength; //in seconds
     bool gameEnded;
 
-    public int localMovement;
-    int endOfGameMovementP1;
-    int endOfGameMovementP2;
+     public float localMovement;
+    // float endOfGameMovementP1;
+    //  float endOfGameMovementP2;
+    public float MovementP1;
+    public float MovementP2;
 
 
     private void Awake()
     {
         GSC = this;
         photonView = GetComponent<PhotonView>();
-        gameEnded = false;
 
-        player1Score = 0;
-        player2Score = 0;
-        snowballsSpawned = 0;
         maxSnowballs = 15;
         xArea = 13.0f; //Area for sb spawns (+/- xArea)
         zArea = 4.0f;
         spawnWait = 1.0f; //time between sb spawns 
         startWait = 0.0f; //time before sb start spawning
-
-        localMovement = 0;
-        endOfGameMovementP1 = 0;
-        endOfGameMovementP2 = 0;
-        endOfGameSBThrownP1 = 0;
-        endOfGameSBThrownP2 = 0;
-
+        
         if (level==101)
         {
-            matchLength = 90; //90
+            matchLength = 20; //90
         }
         else if (level == 102)
         {
@@ -71,7 +65,7 @@ public class GameSetupController : MonoBehaviour
         }
         else
         {
-            matchLength = 120; //120sec default time
+            matchLength = 20; //120sec default time
         }
     }
 
@@ -166,38 +160,48 @@ public class GameSetupController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //update snowball-Counter
-       // if (snowballsSpawned >= maxSnowballs)
-        //{
-         //   pauseCoroutine = true;
-           // Debug.Log("pauseCoroutine " + pauseCoroutine);
-       // }
-       // else
-       // {
-        //    pauseCoroutine = false;
-          //  Debug.Log("pauseCoroutine " + pauseCoroutine);
-       // }
-
         // stop snowball spawns, delete snowballs, update statistics, save into txt and go back to menu
         if (matchLength < 0f && !gameEnded && PhotonNetwork.IsMasterClient)//end game when countdown reaches 0
         {
-            Debug.Log("countdown 0 - try end game");
-           // photonView.RPC("StopSnowballs", RpcTarget.All); //stops coroutines for all players + deletes sb
-
-            //TODO update statistics 
-            photonView.RPC("UpdateAllStats", RpcTarget.All);
             gameEnded = true;
-
-            //save statistics (playerCounts, movementWalked, numberOfTeleports etc.)
-            photonView.RPC("SaveStats", RpcTarget.MasterClient);
-            // change back to menu scene (waiting room)
-            photonView.RPC("BackToMenu", RpcTarget.MasterClient);
+            Debug.Log("countdown 0 - try end game");
+            
+            StartCoroutine(EndGame());
         }
         else if (matchLength >= 0f) //update countdown for "matchlength"-seconds
         {
             matchLength = matchLength - Time.deltaTime;
             timerText.SetText("" + (int)matchLength);
         }
+    }
+
+    IEnumerator EndGame()
+    {
+        // photonView.RPC("StopSnowballs", RpcTarget.All); //stops coroutines for all players + deletes sb
+
+        //TODO update statistics 
+        Debug.Log("end of game stats p1");
+        MovementP1 = localMovement;
+        // endOfGameSBThrownP1 = snowballsSpawned - maxSnowballs;
+        
+        Debug.Log("end of game stats p2");
+        photonView.RPC("UpdateAllStats", RpcTarget.Others);
+        yield return new WaitForSeconds(2.0f);
+        
+        MovementP2 = (float)PhotonNetwork.MasterClient.CustomProperties["MovementP2"];
+        endOfGameSBThrownP2 = (int)PhotonNetwork.MasterClient.CustomProperties["endOfGameSBThrownP2"];
+
+        //save statistics (playerCounts, movementWalked, numberOfTeleports etc.)
+        photonView.RPC("SaveStats", RpcTarget.MasterClient);
+
+        //TODO reset statistics 
+        Debug.Log("reset stats ");
+        photonView.RPC("RPCresetStats", RpcTarget.All);
+        yield return new WaitForSeconds(1.0f);
+
+        // change back to menu scene (waiting room)
+        photonView.RPC("BackToMenu", RpcTarget.MasterClient);
+        
     }
 
     //spawns snowballs around a given point (Vec3) until certain amount is reached (maxSnowballs)
@@ -209,10 +213,11 @@ public class GameSetupController : MonoBehaviour
         while (snowballsSpawned < maxSnowballs) //!pauseCoroutine 
         {
             SpawnSnowballAtRandomLoc();
-            Debug.Log("Snowball-counter:" + snowballsSpawned);
+            // Debug.Log("Snowball-counter:" + snowballsSpawned);
 
             yield return new WaitForSeconds(spawnWait);
         }
+        Debug.Log("Snowball-counter:" + snowballsSpawned);
     }
 
     public void SpawnSnowballAtRandomLoc()
@@ -243,57 +248,27 @@ public class GameSetupController : MonoBehaviour
             snowballsSpawned++;
         }
     }
-  
-    [PunRPC]
-    void StopSnowballs()
+
+    //triggered with button-Press (leftHand controller)
+    public void teleportCounter()
     {
-        //stop spawning snowballs for master
-        if (PhotonNetwork.IsMasterClient)
-        {
-            StopCoroutine(player1Coroutine);
-
-            //delete all snowballs that you own/created and that are not currently hold 
-            foreach (GameObject sb in GameObject.FindGameObjectsWithTag("Snowball"))
-            {
-                //Destroy(sb, 0.1f);
-
-                //TODO still crashes for p2 - disabled for now ... sceneChange deletes everything anyways
-                if (sb.GetPhotonView().IsMine && !sb.GetComponent<CollideScriptSnowball>().SnowballGrabbed)
-                {
-                    // photonView.RPC("DeleteSnowball", RpcTarget.MasterClient, sb.GetPhotonView());
-                    Debug.Log("GSC: try destroying Snowball");
-                    PhotonNetwork.Destroy(sb);
-                }
-            }
-        }
-        else //stop spawning snowballs for !master
-        {
-            StopCoroutine(player2Coroutine);
-            foreach (GameObject sb in GameObject.FindGameObjectsWithTag("SnowballP2"))
-            {
-                if (sb.GetPhotonView().IsMine && !sb.GetComponent<CollideScriptSnowball>().SnowballGrabbed)
-                {
-                    Debug.Log("GSC: try destroying Snowball P2");
-                    PhotonNetwork.Destroy(sb);
-                }
-            }
-        }
+        //todo fix 
+        localMovement++;
+        MovementP1++;
+        Debug.Log("localMovement (tp): " + localMovement);
+        Debug.Log("MovementP1 (tp): " + MovementP1);
     }
     
-    // currently not used 
-    [PunRPC]
-    public void DeleteSnowball(PhotonView pv)
-    {
-        //should/can only be called by master -> destroys obj instanciated by network
-        Debug.Log("GSC: try destroying Snowball");
-        if (PhotonNetwork.IsMasterClient)
-        {
-           pv.TransferOwnership(PhotonNetwork.MasterClient);
-            PhotonNetwork.Destroy(pv);
-        }
-        Debug.Log("GSC: destroyed Snowball");
-    }
+    /// PUN - RPCs --------------------------------------------------------
     
+    //[PunRPC]
+    //public void RPCteleportCounterP2()
+    //{
+    //    MovementP2 += 1.0f;
+    //    // Debug.Log("MovementP2 (tp): " + MovementP2);
+    //}
+
+
     [PunRPC]
     void UpdatePlayer1Score()
     {
@@ -312,26 +287,47 @@ public class GameSetupController : MonoBehaviour
         Debug.Log("Player2Panel changed");
     }
 
-    
+    //called on other/remote Player -> updates stats for master
     [PunRPC]
     void UpdateAllStats()
     {
-        Debug.Log("end of game stats");
-        if (PhotonNetwork.IsMasterClient)
-        {
-            Debug.Log("end of game stats p1");
-            endOfGameMovementP1 = localMovement;
-            endOfGameSBThrownP1 = snowballsSpawned - maxSnowballs;
-        }
-        else
-        {
-            Debug.Log("end of game stats p2");
-            endOfGameMovementP2 = localMovement;
-            endOfGameSBThrownP2 = snowballsSpawned - maxSnowballs;
-        }
+       // endOfGameSBThrownP2 = snowballsSpawned - maxSnowballs;
+       
+        Hashtable hash = new Hashtable();
+        hash.Add("MovementP2", localMovement);
+        hash.Add("endOfGameSBThrownP2", endOfGameSBThrownP2);
+       // PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
+        PhotonNetwork.MasterClient.SetCustomProperties(hash);
+
+    }
+
+    [PunRPC]
+    void RPCresetStats()
+    {
+        gameEnded = false;
+        player1Score = 0;
+        player2Score = 0;
+
+        endOfGameSBThrownP1 = 0;
+        endOfGameSBThrownP2 = 0;
+        snowballsSpawned = 0;
+
+        localMovement = 0f;
+        MovementP1 = 0f;
+        MovementP2 = 0f;
+
+        Hashtable hash = new Hashtable();
+        hash.Add("MovementP2", localMovement);
+        hash.Add("endOfGameSBThrownP2", endOfGameSBThrownP2);
+        PhotonNetwork.MasterClient.SetCustomProperties(hash);
+        //todo test
+        PhotonNetwork.MasterClient.CustomProperties["MovementP2"] = 0f;
+        PhotonNetwork.MasterClient.CustomProperties["endOfGameSBThrownP2"] = 0;
+        
     }
 
     //saves statistics for both players and saves it into txt-file (Asset-Folder)
+    // RPC not necessary, currently only called on master once
     [PunRPC] 
     void SaveStats()
     {
@@ -340,16 +336,16 @@ public class GameSetupController : MonoBehaviour
         //path of the file
         string path = Application.dataPath + "/GameStatistics.txt";
         Debug.Log("path: " + path);
-
+        
         //create if it doesn't exist, otherwise append
         if (!File.Exists(path))
         {
             Debug.Log("create File");
-            File.WriteAllText(path, "StartContent \n --------------------------------------- \n");
+            File.WriteAllText(path, "StartContent \n How2Read: \n total movement: int = nuberOfTeleports, floats = metersWalked \n 101+102=tutorial-lvl, 1=tj, 2=jj, 3=H-tj, 4=H-jj \n --------------------------------------- \n");
         }
         string LevelAndTime = "Time: " + System.DateTime.Now + "\n" + "Stats for Level: " + level + "\n\n";
-        string playerStatsP1 = "Player 1 (Master): \n endOfGameMovementP1: " + endOfGameMovementP1 + "\n SnowballsThrown: " + endOfGameSBThrownP1 + "\n player1Score: " + player1Score + "\n \n";
-        string playerStatsP2 = "Player 2: \n endOfGameMovementP1: " + endOfGameMovementP2 + "\n SnowballsThrown: " + endOfGameSBThrownP2 + "\n player1Score: " + player2Score + "\n";
+        string playerStatsP1 = "Player 1 (Master): \n total movement: " + MovementP1 + "\n SnowballsThrown: " + endOfGameSBThrownP1 + "\n player1Score: " + player1Score + "\n \n";
+        string playerStatsP2 = "Player 2: \n total movement: " + MovementP2 + "\n SnowballsThrown: " + endOfGameSBThrownP2 + "\n player2Score: " + player2Score + "\n";
         string devider = "--------------------------------------- \n";
 
         //appends current stats to txt-file
@@ -369,5 +365,55 @@ public class GameSetupController : MonoBehaviour
             PhotonNetwork.LoadLevel(1);
         }
     }
-    
+
+    //[PunRPC]
+    //void StopSnowballs()
+    //{
+    //    //stop spawning snowballs for master
+    //    if (PhotonNetwork.IsMasterClient)
+    //    {
+    //        StopCoroutine(player1Coroutine);
+
+    //        //delete all snowballs that you own/created and that are not currently hold 
+    //        foreach (GameObject sb in GameObject.FindGameObjectsWithTag("Snowball"))
+    //        {
+    //            //Destroy(sb, 0.1f);
+
+    //            //TODO still crashes for p2 - disabled for now ... sceneChange deletes everything anyways
+    //            if (sb.GetPhotonView().IsMine && !sb.GetComponent<CollideScriptSnowball>().SnowballGrabbed)
+    //            {
+    //                // photonView.RPC("DeleteSnowball", RpcTarget.MasterClient, sb.GetPhotonView());
+    //                Debug.Log("GSC: try destroying Snowball");
+    //                PhotonNetwork.Destroy(sb);
+    //            }
+    //        }
+    //    }
+    //    else //stop spawning snowballs for !master
+    //    {
+    //        StopCoroutine(player2Coroutine);
+    //        foreach (GameObject sb in GameObject.FindGameObjectsWithTag("SnowballP2"))
+    //        {
+    //            if (sb.GetPhotonView().IsMine && !sb.GetComponent<CollideScriptSnowball>().SnowballGrabbed)
+    //            {
+    //                Debug.Log("GSC: try destroying Snowball P2");
+    //                PhotonNetwork.Destroy(sb);
+    //            }
+    //        }
+    //    }
+    //}
+
+    // currently not used - strg+k strg+c --- strg+k strg+u
+    //[PunRPC]
+    //public void DeleteSnowball(PhotonView pv)
+    //{
+    //    //should/can only be called by master -> destroys obj instanciated by network
+    //    Debug.Log("GSC: try destroying Snowball");
+    //    if (PhotonNetwork.IsMasterClient)
+    //    {
+    //       pv.TransferOwnership(PhotonNetwork.MasterClient);
+    //        PhotonNetwork.Destroy(pv);
+    //    }
+    //    Debug.Log("GSC: destroyed Snowball");
+    //}
+
 }

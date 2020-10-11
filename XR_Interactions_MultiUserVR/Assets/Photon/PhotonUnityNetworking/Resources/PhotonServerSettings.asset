@@ -49,6 +49,10 @@ MonoBehaviour:
   - UpdateAllStats
   - UpdateCanvasCancel
   - SelectionCanceled
+  - RPCteleportCounter
+  - RPCmovementP2
+  - RPCteleportCounterP2
+  - RPCresetStats
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

@@ -38,7 +38,15 @@ namespace UnityEngine.XR.Interaction.Toolkit
                 rightController.SetActive(true);
             }
         }
-        
+
+
+        //triggered with button-Press (leftHand controller)
+        public void teleportCounter()
+        {
+            GameSetupController.GSC.localMovement++;
+           // Debug.Log("localMovement (tp): " + GameSetupController.GSC.localMovement);
+        }
+
     }
 }
 

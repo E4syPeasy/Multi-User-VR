@@ -376,6 +376,7 @@ MonoBehaviour:
   rightController: {fileID: 0}
   Avatar: {fileID: 0}
   allRenderer: []
+  TotalVecLength: 0
   speed: 1
 --- !u!114 &2702487018788394916
 MonoBehaviour:

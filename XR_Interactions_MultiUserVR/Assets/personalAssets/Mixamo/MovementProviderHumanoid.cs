@@ -16,7 +16,8 @@ public class MovementProviderHumanoid : LocomotionProvider
     public GameObject leftController;               
     public GameObject rightController;
     public GameObject Avatar;
-    public float speed = 1.1f;
+    public float speed; //2.7
+    public float TotalVecLength;
     private CharacterController characterController = null;
     private GameObject head = null;
     public Animator animator;
@@ -115,10 +116,27 @@ public class MovementProviderHumanoid : LocomotionProvider
 
         // Apply speed and move
         Vector3 movement = direction * speed;
-        characterController.Move(movement * Time.deltaTime);
+        Vector3 distance = movement * Time.deltaTime;
 
-        ///Animations
-        ///
+        float VecLength = distance.magnitude;
+        TotalVecLength = TotalVecLength + VecLength;
+
+         GameSetupController.GSC.localMovement = TotalVecLength;
+        //Debug.Log("localMovement: " + GameSetupController.GSC.localMovement);
+
+        //if (PhotonNetwork.IsMasterClient)
+        //{
+        //    GameSetupController.GSC.MovementP1 = TotalVecLength;
+        //}
+        //else //todo check if network can handle this
+        //{
+        //    GameSetupController.GSC.photonView.RPC("RPCmovementP2", RpcTarget.MasterClient, TotalVecLength);
+        //}
+
+        characterController.Move(distance);
+
+        ///Animations ---------
+
         //start in idle
         float animator_x = 0f; //horizontal
         float animator_z = 0f;   //animator_vertical

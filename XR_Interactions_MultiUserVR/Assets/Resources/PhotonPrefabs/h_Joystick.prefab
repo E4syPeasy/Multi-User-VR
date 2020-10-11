@@ -372,6 +372,7 @@ MonoBehaviour:
   rightController: {fileID: 8744999659721966885}
   Avatar: {fileID: 5034255796117200730}
   speed: 2.7
+  TotalVecLength: 0
   animator: {fileID: 3962228616240100183}
   allRenderer:
   - {fileID: 206763784171906627}

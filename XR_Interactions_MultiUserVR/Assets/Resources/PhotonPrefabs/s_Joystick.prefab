@@ -392,6 +392,7 @@ MonoBehaviour:
   Avatar: {fileID: 6498563740473979083}
   allRenderer:
   - {fileID: 6498563740471782923}
+  TotalVecLength: 0
   speed: 2.7
 --- !u!114 &8487174339941409516
 MonoBehaviour:
