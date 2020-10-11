@@ -6,14 +6,12 @@ public class CollideScriptSnowball : MonoBehaviourPun, IPunObservable
     PhotonView GSCphotonView;
     int collsionCounter;
     PhotonView thisPV;
-
     bool sbDestroyed;
     Rigidbody rb;
     Vector3 latestPos;
     Quaternion latestRot;
     Vector3 velocity;
     Vector3 angularVelocity;
-
     bool valuesReceived = false;
     public bool SnowballGrabbed; 
 
@@ -60,10 +58,6 @@ public class CollideScriptSnowball : MonoBehaviourPun, IPunObservable
     //Transfer PhotonView of obj/Rigidbody to our local player
     public void OnSnowballGrabbed()
     {
-        if (!thisPV.IsMine)
-        {
-            // thisPV.TransferOwnership(PhotonNetwork.LocalPlayer);
-        }
         Debug.Log("SnowballGrabbed: " + SnowballGrabbed);
         SnowballGrabbed = true;
     }
@@ -76,9 +70,6 @@ public class CollideScriptSnowball : MonoBehaviourPun, IPunObservable
         Debug.Log("Collide-script: try destroy" + thisPV);
         //only master destroys (network-)instantiated object associated with photonView (for all players)
         // ^ only for scene/room-objects
-        //GSCphotonView.RPC("DeleteSnowball", RpcTarget.MasterClient, thisPV);
-
-        //GameSetupController.GSC.snowballsSpawned--;
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -93,7 +84,7 @@ public class CollideScriptSnowball : MonoBehaviourPun, IPunObservable
 
         if (thisPV.IsMine)
         {
-            //PhotonNetwork.Destroy(thisPV); //TODO test
+            //PhotonNetwork.Destroy(thisPV);
             PhotonNetwork.Destroy(gameObject);
         }
 
@@ -112,7 +103,7 @@ public class CollideScriptSnowball : MonoBehaviourPun, IPunObservable
         }
     }
 
-
+    //updates synchronizes Snowballs for all players network
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)

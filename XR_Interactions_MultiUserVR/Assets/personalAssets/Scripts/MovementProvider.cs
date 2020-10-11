@@ -120,15 +120,6 @@ public class MovementProvider : LocomotionProvider
         float VecLength = distance.magnitude;
         TotalVecLength = TotalVecLength + VecLength;
 
-        //if (PhotonNetwork.IsMasterClient)
-        //{
-        //    GameSetupController.GSC.MovementP1 = TotalVecLength;
-        //}
-        //else //todo check if network can handle this -> Rpc inside Rpc?
-        //{
-        //    GameSetupController.GSC.photonView.RPC("RPCmovementP2", RpcTarget.MasterClient, TotalVecLength);
-        //}
-
         GameSetupController.GSC.localMovement = TotalVecLength;
        // Debug.Log("localMovement: " + GameSetupController.GSC.localMovement);
 

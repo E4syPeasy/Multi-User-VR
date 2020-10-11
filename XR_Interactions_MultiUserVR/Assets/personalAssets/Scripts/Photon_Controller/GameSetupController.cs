@@ -32,14 +32,11 @@ public class GameSetupController : MonoBehaviour
     float zArea;
     float spawnWait; //time between sb spawns
     float startWait; //time before sb start spawning
-   // public bool pauseCoroutine;
     public TextMeshProUGUI timerText;
     float matchLength; //in seconds
     bool gameEnded;
 
      public float localMovement;
-    // float endOfGameMovementP1;
-    //  float endOfGameMovementP2;
     public float MovementP1;
     public float MovementP2;
 
@@ -57,7 +54,7 @@ public class GameSetupController : MonoBehaviour
         
         if (level==101)
         {
-            matchLength = 20; //90
+            matchLength = 90; //90
         }
         else if (level == 102)
         {
@@ -65,7 +62,7 @@ public class GameSetupController : MonoBehaviour
         }
         else
         {
-            matchLength = 20; //120sec default time
+            matchLength = 120; //120sec default time
         }
     }
 
@@ -250,25 +247,17 @@ public class GameSetupController : MonoBehaviour
     }
 
     //triggered with button-Press (leftHand controller)
-    public void teleportCounter()
-    {
-        //todo fix 
-        localMovement++;
-        MovementP1++;
-        Debug.Log("localMovement (tp): " + localMovement);
-        Debug.Log("MovementP1 (tp): " + MovementP1);
-    }
+    // moved to CustomTeleportSetup
+    //public void teleportCounter()
+    //{
+    //    localMovement++;
+    //    MovementP1++;
+    //    Debug.Log("localMovement (tp): " + localMovement);
+    //    Debug.Log("MovementP1 (tp): " + MovementP1);
+    //}
     
     /// PUN - RPCs --------------------------------------------------------
     
-    //[PunRPC]
-    //public void RPCteleportCounterP2()
-    //{
-    //    MovementP2 += 1.0f;
-    //    // Debug.Log("MovementP2 (tp): " + MovementP2);
-    //}
-
-
     [PunRPC]
     void UpdatePlayer1Score()
     {
@@ -296,7 +285,6 @@ public class GameSetupController : MonoBehaviour
         Hashtable hash = new Hashtable();
         hash.Add("MovementP2", localMovement);
         hash.Add("endOfGameSBThrownP2", endOfGameSBThrownP2);
-       // PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
         PhotonNetwork.MasterClient.SetCustomProperties(hash);
 
     }

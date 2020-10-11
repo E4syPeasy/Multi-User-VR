@@ -7,8 +7,11 @@ using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
-// basic movement from "VR with Andrew"
-// https://github.com/C-Through/VR-XRToolkitLocomotion/blob/master/Assets/Scripts/MovementProvider.cs
+/// <summary>
+/// basic movement from "VR with Andrew"
+/// https://github.com/C-Through/VR-XRToolkitLocomotion/blob/master/Assets/Scripts/MovementProvider.cs
+/// added animations, saving stats, disabling/enabling components
+/// </summary>
 public class MovementProviderHumanoid : LocomotionProvider
 {
     PhotonView photonView;
@@ -124,15 +127,6 @@ public class MovementProviderHumanoid : LocomotionProvider
          GameSetupController.GSC.localMovement = TotalVecLength;
         //Debug.Log("localMovement: " + GameSetupController.GSC.localMovement);
 
-        //if (PhotonNetwork.IsMasterClient)
-        //{
-        //    GameSetupController.GSC.MovementP1 = TotalVecLength;
-        //}
-        //else //todo check if network can handle this
-        //{
-        //    GameSetupController.GSC.photonView.RPC("RPCmovementP2", RpcTarget.MasterClient, TotalVecLength);
-        //}
-
         characterController.Move(distance);
 
         ///Animations ---------
@@ -149,7 +143,7 @@ public class MovementProviderHumanoid : LocomotionProvider
         animator.SetFloat("Vertical", animator_z);  
     }
 
-    //currently not used because it caused strange lags
+    //currently not used - caused strange lags+crashes
     public void throwAnimation(bool started)
     {
         if (started)
