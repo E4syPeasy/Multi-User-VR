@@ -36,9 +36,13 @@ public class GameSetupController : MonoBehaviour
     float matchLength; //in seconds
     bool gameEnded;
 
-     public float localMovement;
+    public int numberOfTeleports;
+    public int numberOfTeleportsP2;
+    public float localMovement;
     public float MovementP1;
     public float MovementP2;
+    private string playerType;
+    private string playerTypeP2;
 
 
     private void Awake()
@@ -54,7 +58,7 @@ public class GameSetupController : MonoBehaviour
         
         if (level==101)
         {
-            matchLength = 90; //90
+            matchLength = 60; //90
         }
         else if (level == 102)
         {
@@ -176,25 +180,40 @@ public class GameSetupController : MonoBehaviour
     {
         // photonView.RPC("StopSnowballs", RpcTarget.All); //stops coroutines for all players + deletes sb
 
-        //TODO update statistics 
         Debug.Log("end of game stats p1");
         MovementP1 = localMovement;
-        // endOfGameSBThrownP1 = snowballsSpawned - maxSnowballs;
-        
+        if (numberOfTeleports == 0)
+        {
+            playerType = "Joystick";
+        }
+        else
+        {
+            playerType = "Teleport";
+        }
+
         Debug.Log("end of game stats p2");
         photonView.RPC("UpdateAllStats", RpcTarget.Others);
-        yield return new WaitForSeconds(2.0f);
-        
+        yield return new WaitForSeconds(1.0f);
+
+        numberOfTeleportsP2 = (int)PhotonNetwork.MasterClient.CustomProperties["numberOfTeleportsP2"];
         MovementP2 = (float)PhotonNetwork.MasterClient.CustomProperties["MovementP2"];
         endOfGameSBThrownP2 = (int)PhotonNetwork.MasterClient.CustomProperties["endOfGameSBThrownP2"];
 
+        if (numberOfTeleportsP2 == 0)
+        {
+            playerTypeP2 = "Joystick";
+        }
+        else
+        {
+            playerTypeP2 = "Teleport";
+        }
+        
         //save statistics (playerCounts, movementWalked, numberOfTeleports etc.)
         photonView.RPC("SaveStats", RpcTarget.MasterClient);
 
-        //TODO reset statistics 
         Debug.Log("reset stats ");
         photonView.RPC("RPCresetStats", RpcTarget.All);
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(0.5f);
 
         // change back to menu scene (waiting room)
         photonView.RPC("BackToMenu", RpcTarget.MasterClient);
@@ -285,6 +304,7 @@ public class GameSetupController : MonoBehaviour
         Hashtable hash = new Hashtable();
         hash.Add("MovementP2", localMovement);
         hash.Add("endOfGameSBThrownP2", endOfGameSBThrownP2);
+        hash.Add("numberOfTeleportsP2", numberOfTeleports);
         PhotonNetwork.MasterClient.SetCustomProperties(hash);
 
     }
@@ -300,6 +320,7 @@ public class GameSetupController : MonoBehaviour
         endOfGameSBThrownP2 = 0;
         snowballsSpawned = 0;
 
+        numberOfTeleports = 0;
         localMovement = 0f;
         MovementP1 = 0f;
         MovementP2 = 0f;
@@ -329,11 +350,11 @@ public class GameSetupController : MonoBehaviour
         if (!File.Exists(path))
         {
             Debug.Log("create File");
-            File.WriteAllText(path, "StartContent \n How2Read: \n total movement: int = nuberOfTeleports, floats = metersWalked \n 101+102=tutorial-lvl, 1=tj, 2=jj, 3=H-tj, 4=H-jj \n --------------------------------------- \n");
+            File.WriteAllText(path, "StartContent \n How2Read: \n 101+102=tutorial-lvl, 1=tj, 2=jj, 3=H-tj, 4=H-jj \n --------------------------------------- \n");
         }
         string LevelAndTime = "Time: " + System.DateTime.Now + "\n" + "Stats for Level: " + level + "\n\n";
-        string playerStatsP1 = "Player 1 (Master): \n total movement: " + MovementP1 + "\n SnowballsThrown: " + endOfGameSBThrownP1 + "\n player1Score: " + player1Score + "\n \n";
-        string playerStatsP2 = "Player 2: \n total movement: " + MovementP2 + "\n SnowballsThrown: " + endOfGameSBThrownP2 + "\n player2Score: " + player2Score + "\n";
+        string playerStatsP1 = "Player 1 (Master): player-type" + playerType + "\n total movement:" + MovementP1 + "\n number of teleports: " + numberOfTeleports + "\n SnowballsThrown: " + endOfGameSBThrownP1 + "\n player1Score: " + player1Score + "\n \n";
+        string playerStatsP2 = "Player 2: player-type"          + playerTypeP2 + "\n total movement: " + MovementP2 + "\n number of teleports: " + numberOfTeleportsP2 + "\n SnowballsThrown: " + endOfGameSBThrownP2 + "\n player2Score: " + player2Score + "\n";
         string devider = "--------------------------------------- \n";
 
         //appends current stats to txt-file

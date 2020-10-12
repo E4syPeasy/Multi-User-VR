@@ -14,6 +14,9 @@ namespace UnityEngine.XR.Interaction.Toolkit
         public GameObject rightController;
         public GameObject Avatar;
         public Renderer[] allRenderer;
+        Vector3 currentPosition;
+        Vector3 lastPosition;
+        bool skippedFirst;
 
         void Awake()
         {
@@ -43,10 +46,25 @@ namespace UnityEngine.XR.Interaction.Toolkit
         //triggered with button-Press (leftHand controller)
         public void teleportCounter()
         {
-            GameSetupController.GSC.localMovement++;
-           // Debug.Log("localMovement (tp): " + GameSetupController.GSC.localMovement);
-        }
+            GameSetupController.GSC.numberOfTeleports++;
+            //Debug.Log("numberOfTeleports: " + GameSetupController.GSC.numberOfTeleports);
 
+            currentPosition = Avatar.transform.position;
+           // Debug.Log("currentPosition: " + currentPosition);
+           // Debug.Log("lastPosition: " + lastPosition);
+
+            if (skippedFirst)
+            {
+                float distance = Vector3.Distance(lastPosition, currentPosition);
+               // Debug.Log("distance: " + distance);
+
+                GameSetupController.GSC.localMovement += distance;
+                Debug.Log("localMovement: " + GameSetupController.GSC.localMovement);
+            }
+
+            lastPosition = currentPosition;
+            skippedFirst = true;
+        }
     }
 }
 
