@@ -353,8 +353,8 @@ public class GameSetupController : MonoBehaviour
             File.WriteAllText(path, "StartContent \n How2Read: \n 101+102=tutorial-lvl, 1=tj, 2=jj, 3=H-tj, 4=H-jj \n --------------------------------------- \n");
         }
         string LevelAndTime = "Time: " + System.DateTime.Now + "\n" + "Stats for Level: " + level + "\n\n";
-        string playerStatsP1 = "Player 1 (Master): player-type" + playerType + "\n total movement:" + MovementP1 + "\n number of teleports: " + numberOfTeleports + "\n SnowballsThrown: " + endOfGameSBThrownP1 + "\n player1Score: " + player1Score + "\n \n";
-        string playerStatsP2 = "Player 2: player-type"          + playerTypeP2 + "\n total movement: " + MovementP2 + "\n number of teleports: " + numberOfTeleportsP2 + "\n SnowballsThrown: " + endOfGameSBThrownP2 + "\n player2Score: " + player2Score + "\n";
+        string playerStatsP1 = "Player 1 (Master): " + playerType + "\n total movement:" + MovementP1 + "\n number of teleports: " + numberOfTeleports + "\n SnowballsThrown: " + endOfGameSBThrownP1 + "\n player1Score: " + player1Score + "\n \n";
+        string playerStatsP2 = "Player 2: "          + playerTypeP2 + "\n total movement: " + MovementP2 + "\n number of teleports: " + numberOfTeleportsP2 + "\n SnowballsThrown: " + endOfGameSBThrownP2 + "\n player2Score: " + player2Score + "\n";
         string devider = "--------------------------------------- \n";
 
         //appends current stats to txt-file
