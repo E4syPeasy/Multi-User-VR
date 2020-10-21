@@ -1304,7 +1304,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "grab-button (left Controller) to teleport towards selected area \n\ngrab-button
+  m_text: "trigger-button (left Controller) to teleport towards selected area \n\ngrab-button
     (right controller) to pick up snowballs"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1350,7 +1350,7 @@ MonoBehaviour:
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
-  m_firstOverflowCharacterIndex: 66
+  m_firstOverflowCharacterIndex: 69
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
   m_isTextTruncated: 0
@@ -1374,7 +1374,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: -139.16183, w: 0}
   m_textInfo:
     textComponent: {fileID: 223511486}
-    characterCount: 117
+    characterCount: 120
     spriteCount: 0
     spaceCount: 16
     wordCount: 15
