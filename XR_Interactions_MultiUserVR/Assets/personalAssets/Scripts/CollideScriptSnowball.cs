@@ -54,8 +54,8 @@ public class CollideScriptSnowball : MonoBehaviourPun, IPunObservable
             sbDestroyed = true;
         }
     }
-
-    //Transfer PhotonView of obj/Rigidbody to our local player
+    
+    // snowball positions only get updated when grabbed/thrown
     public void OnSnowballGrabbed()
     {
         Debug.Log("SnowballGrabbed: " + SnowballGrabbed);
